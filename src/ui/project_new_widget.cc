@@ -59,6 +59,10 @@ ProjectWidget::ProjectWidget(QWidget* parent, OptionManager* options)
   image_path_text_ = new QLineEdit(this);
   image_path_text_->setText(QString::fromStdString(*options_->image_path));
 
+  QPushButton* project_path_select = new QPushButton(tr("Select"), this);
+  connect(project_path_select, &QPushButton::released, this, &ProjectWidget::SelectProjectPath);
+  project_path_text_ = new QLineEdit(this);
+  project_path_text_->setText(QString::fromStdString(*options_->project_path));
   // Save button.
   QPushButton* create_button = new QPushButton(tr("Save"), this);
   connect(create_button, &QPushButton::released, this, &ProjectWidget::Save);
@@ -74,7 +78,12 @@ ProjectWidget::ProjectWidget(QWidget* parent, OptionManager* options)
   grid->addWidget(image_path_text_, 1, 1);
   grid->addWidget(image_path_select, 1, 2);
 
-  grid->addWidget(create_button, 2, 2);
+  grid->addWidget(new QLabel(tr("WorkSpace")), 2, 0);
+  grid->addWidget(project_path_text_, 2, 1);
+  grid->addWidget(project_path_select, 2, 2);
+ //grid->addWidget
+
+  grid->addWidget(create_button, 3, 2);
 }
 
 bool ProjectWidget::IsValid() const {
@@ -95,6 +104,10 @@ std::string ProjectWidget::GetImagePath() const {
   return image_path_text_->text().toUtf8().constData();
 }
 
+std::string ProjectWidget::GetProjectPath() const{
+  return project_path_text_->text().toUtf8().constData();
+}
+
 void ProjectWidget::SetDatabasePath(const std::string& path) {
   database_path_text_->setText(QString::fromStdString(path));
 }
@@ -107,6 +120,7 @@ void ProjectWidget::Save() {
   if (IsValid()) {
     *options_->database_path = GetDatabasePath();
     *options_->image_path = GetImagePath();
+    *options_->project_path = GetProjectPath();
 
     // Save empty database file.
     Database database(*options_->database_path);
@@ -145,6 +159,16 @@ void ProjectWidget::SelectImagePath() {
   if (image_path != "") {
     image_path_text_->setText(image_path);
   }
+}
+
+void ProjectWidget::SelectProjectPath(){
+  const auto project_path = QFileDialog::getExistingDirectory(
+    this, tr("Select project path..."), DefaultDirectory(),
+    QFileDialog::ShowDirsOnly);
+  if(project_path != ""){
+    project_path_text_->setText(project_path);
+  }
+  
 }
 
 QString ProjectWidget::DefaultDirectory() {

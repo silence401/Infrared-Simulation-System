@@ -46,6 +46,7 @@
 #include "base/track.h"
 #include "util/alignment.h"
 #include "util/types.h"
+#include "ui/mesh_painter.h"
 
 namespace infrared {
 
@@ -297,6 +298,8 @@ class Reconstruction {
 
   // Create all image sub-directories in the given path.
   void CreateImageDirs(const std::string& path) const;
+
+  std::vector<Mesh> Meshes;
 
  private:
   size_t FilterPoints3DWithSmallTriangulationAngle(

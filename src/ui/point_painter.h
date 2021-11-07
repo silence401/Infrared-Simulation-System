@@ -34,6 +34,7 @@
 
 #include <QtCore>
 #include <QtOpenGL>
+#include "ui/mesh_painter.h"
 
 namespace infrared {
 
@@ -54,6 +55,7 @@ class PointPainter {
 
   void Setup();
   void Upload(const std::vector<PointPainter::Data>& data);
+  void Upload(const Mesh& data);
   void Render(const QMatrix4x4& pmv_matrix, const float point_size);
 
  private:

@@ -153,23 +153,23 @@ void FeatureExtractMatchController::Stop() {
 }
 
 void FeatureExtractMatchController::Run() {
-  std::cout<<"Feature Start"<<std::endl;
+  //std::cout<<"Feature Start"<<std::endl;
   if (IsStopped()) {
     return;
   }
 
   RunFeatureExtraction();
-  std::cout<<"Feature Start Extract"<<std::endl;
+  //std::cout<<"Feature Start Extract"<<std::endl;
   if (IsStopped()) {
     return;
   }
 
   RunFeatureMatching();
-  std::cout<<"Feature Start Matching"<<std::endl;
+  //std::cout<<"Feature Start Matching"<<std::endl;
   if (IsStopped()) {
     return;
   }
-  std::cout<<"RUNFeature Over"<<std::endl;
+  //std::cout<<"RUNFeature Over"<<std::endl;
 }
 
 

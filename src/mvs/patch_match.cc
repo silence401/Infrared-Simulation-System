@@ -193,8 +193,11 @@ PatchMatchController::PatchMatchController(const PatchMatchOptions& options,
 
 void PatchMatchController::Run() {
   ReadWorkspace();
+  std::cerr<<"ReadWroksspace Done"<<std::endl;
   ReadProblems();
+   std::cerr<<"ReadProblems Done"<<std::endl;
   ReadGpuIndices();
+   std::cerr<<"ReadGpuIndices Done"<<std::endl;
 
   thread_pool_.reset(new ThreadPool(gpu_indices_.size()));
 
@@ -230,7 +233,9 @@ void PatchMatchController::ReadWorkspace() {
   Workspace::Options workspace_options;
 
   auto workspace_format_lower_case = workspace_format_;
+  std::cerr<<workspace_format_lower_case<<std::endl;
   StringToLower(&workspace_format_lower_case);
+  std::cerr<<workspace_format_lower_case<<std::endl;
   if (workspace_format_lower_case == "pmvs") {
     workspace_options.stereo_folder =
         StringPrintf("stereo-%s", pmvs_option_name_.c_str());
@@ -244,7 +249,7 @@ void PatchMatchController::ReadWorkspace() {
   workspace_options.input_type = options_.geom_consistency ? "photometric" : "";
 
   workspace_.reset(new Workspace(workspace_options));
-
+  std::cerr<<"here1"<<std::endl;
   if (workspace_format_lower_case == "pmvs") {
     std::cout << StringPrintf("Importing PMVS workspace (option %s)...",
                               pmvs_option_name_.c_str())
@@ -252,7 +257,9 @@ void PatchMatchController::ReadWorkspace() {
     ImportPMVSWorkspace(*workspace_, pmvs_option_name_);
   }
 
+  std::cerr<<"read workspace pre done"<<std::endl;
   depth_ranges_ = workspace_->GetModel().ComputeDepthRanges();
+  std::cerr<<"read workspace done"<<std::endl;
 }
 
 void PatchMatchController::ReadProblems() {

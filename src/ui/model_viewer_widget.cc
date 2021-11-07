@@ -254,11 +254,14 @@ void ModelViewerWidget::paintGL() {
   image_line_painter_.Render(pmv_matrix, width(), height(), 1);
   image_triangle_painter_.Render(pmv_matrix);
   image_connection_painter_.Render(pmv_matrix, width(), height(), 1);
-
+   
+  for(size_t i=0; i<meshes_painter_.size(); i++){
+    meshes_painter_[i]->Render(pmv_matrix);
+  }
   // Movie grabber cameras
-  movie_grabber_path_painter_.Render(pmv_matrix, width(), height(), 1.5);
-  movie_grabber_line_painter_.Render(pmv_matrix, width(), height(), 1);
-  movie_grabber_triangle_painter_.Render(pmv_matrix);
+  // movie_grabber_path_painter_.Render(pmv_matrix, width(), height(), 1.5);
+  // movie_grabber_line_painter_.Render(pmv_matrix, width(), height(), 1);
+  // movie_grabber_triangle_painter_.Render(pmv_matrix);
 }
 
 void ModelViewerWidget::resizeGL(int width, int height) {
@@ -271,7 +274,8 @@ void ModelViewerWidget::ReloadReconstruction() {
   if (reconstruction == nullptr) {
     return;
   }
-
+// if(meshes_painter_.size() != 0){
+  
   cameras = reconstruction->Cameras();
   points3D = reconstruction->Points3D();
   reg_image_ids = reconstruction->RegImageIds();
@@ -286,6 +290,15 @@ void ModelViewerWidget::ReloadReconstruction() {
       static_cast<int>(points3D.size())));
 
   Upload();
+  // }
+  //else{
+    // for(size_t i=0; i<reconstruction->Meshes.size(); i++){
+    //   MeshPainter* mesh_painter_ = new MeshPainter();
+    //   mesh_painter_->Upload(reconstruction->Meshes[i]);
+    //   meshes_painter_.push_back(std::shared_ptr<MeshPainter>(mesh_painter_));
+    // }
+    // update();
+ // }
 }
 
 void ModelViewerWidget::ClearReconstruction() {
@@ -649,6 +662,7 @@ void ModelViewerWidget::SetupPainters() {
   point_painter_.Setup();
   point_connection_painter_.Setup();
 
+
   image_line_painter_.Setup();
   image_triangle_painter_.Setup();
   image_connection_painter_.Setup();
@@ -675,12 +689,26 @@ void ModelViewerWidget::Upload() {
   ComposeProjectionMatrix();
 
   UploadPointData();
+  UploadMeshData();
   UploadImageData();
   UploadMovieGrabberData();
   UploadPointConnectionData();
   UploadImageConnectionData();
 
   update();
+}
+void ModelViewerWidget::UploadMeshData(){
+  //makeCurrent();
+  for(size_t i=0; i<reconstruction->Meshes.size(); i++){
+      makeCurrent();
+      MeshPainter* mesh_painter_ = new MeshPainter();
+      mesh_painter_->Setup();
+      std::cout<<"vertices"<<reconstruction->Meshes[i].vertices.size()<<std::endl;
+      std::cout<<"indices"<<reconstruction->Meshes[i].indices.size()<<std::endl;
+      mesh_painter_->Upload(reconstruction->Meshes[i]);
+      meshes_painter_.push_back(std::shared_ptr<MeshPainter>(mesh_painter_));
+    }
+  //point_painter_.Upload(reconstruction->Meshes[0]);
 }
 
 void ModelViewerWidget::UploadCoordinateGridData() {

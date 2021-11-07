@@ -44,7 +44,7 @@ namespace mvs {
 void Model::Read(const std::string& path, const std::string& format) {
   auto format_lower_case = format;
   StringToLower(&format_lower_case);
-  if (format_lower_case == "infrared") {
+  if (format_lower_case == "colmap") {
     ReadFromCOLMAP(path);
   } else if (format_lower_case == "pmvs") {
     ReadFromPMVS(path);

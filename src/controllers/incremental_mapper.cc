@@ -117,12 +117,12 @@ void IterativeGlobalRefinement(const IncrementalMapperOptions& options,
     size_t num_changed_observations = 0;
     AdjustGlobalBundle(options, mapper);
     num_changed_observations += CompleteAndMergeTracks(options, mapper);
-    std::cerr<<"FilterPoints1"<<std::endl;
+   // std::cerr<<"FilterPoints1"<<std::endl;
     num_changed_observations += FilterPoints(options, mapper);
-    std::cerr<<"FilterPoints2"<<std::endl;
+  //  std::cerr<<"FilterPoints2"<<std::endl;
     const double changed =
         static_cast<double>(num_changed_observations) / num_observations;
-    std::cerr<<"FilterPoints3"<<std::endl;
+  //  std::cerr<<"FilterPoints3"<<std::endl;
     std::cout << StringPrintf("  => Changed observations: %.6f", changed)
               << std::endl;
     if (changed < options.ba_global_max_refinement_change) {
@@ -462,11 +462,11 @@ void IncrementalMapperController::Reconstruct(
         reconstruction_manager_->Delete(reconstruction_idx);
         break;
       }
-      std::cerr<<"Filer Points"<<std::endl;
+    //  std::cerr<<"Filer Points"<<std::endl;
       AdjustGlobalBundle(*options_, &mapper);
       FilterPoints(*options_, &mapper);
       FilterImages(*options_, &mapper);
-      std::cerr<<"Filer Points2"<<std::endl;
+      //std::cerr<<"Filer Points2"<<std::endl;
       // Initial image pair failed to register.
       if (reconstruction.NumRegImages() == 0 ||
           reconstruction.NumPoints3D() == 0) {
@@ -480,16 +480,15 @@ void IncrementalMapperController::Reconstruct(
           continue;
         }
       }
-      std::cerr<<"Filer Points3"<<std::endl;
 
       if (options_->extract_colors) {
         ExtractColors(image_path_, image_id1, &reconstruction);
       }
     }
-    std::cerr<<"Filer Points4"<<std::endl;
+   // std::cerr<<"Filer Points4"<<std::endl;
     Callback(INITIAL_IMAGE_PAIR_REG_CALLBACK);
 
-    std::cerr<<"Filer Points5"<<std::endl;
+   // std::cerr<<"Filer Points5"<<std::endl;
 
     ////////////////////////////////////////////////////////////////////////////
     // Incremental mapping

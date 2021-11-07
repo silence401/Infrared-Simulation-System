@@ -51,9 +51,14 @@ class MainWindow : public QMainWindow {
         void CreateControllers();
         void UpdateWindowTitle();
         void ProjectNew();
+        void ProjectEdit();
         void RenderNow();
         void Render();
+        void RenderModel();
+        void Import();
+        void ImportPLY();
         void SFM();
+        void MVSTra();
         void RenderSelectedReconstruction();
         void RenderClear();
         void RenderOptions();
@@ -69,12 +74,16 @@ class MainWindow : public QMainWindow {
 
         bool window_closed_;
         QAction* action_project_new_;
+        QAction* action_project_import_;
+        QAction* action_project_importply_;
         QAction* action_SFM_;
         QAction* action_MVS_traditional_;
         QAction* action_MVS_deeplearning_;
         QAction* action_segmentation_;
         QAction* action_render_;
         QAction* action_render_now_;
+        QAction* action_render_model_;
+        QAction* action_project_edit_;
 
         OptionManager options_;
         ReconstructionManager reconstruction_manager_;
@@ -91,6 +100,7 @@ class MainWindow : public QMainWindow {
         DatabaseManagementWidget* database_management_widget_;
         DenseReconstructionWidget* dense_reconstruction_widget_;
         RenderOptionsWidget* render_options_widget_;
+        ThreadControlWidget* thread_control_widget_;
 
 
 

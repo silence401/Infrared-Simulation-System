@@ -1,5 +1,5 @@
 set(FOLDER_NAME "ui")
-message("UIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIi")
+#message("UIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIi")
 COLMAP_ADD_SOURCES(
 	main_window.h main_window.cc
 	project_new_widget.h project_new_widget.cc
@@ -23,8 +23,8 @@ COLMAP_ADD_SOURCES(
 	thread_control_widget.cc thread_control_widget.h
 	bundle_adjustment_widget.cc bundle_adjustment_widget.h
 	reconstruction_stats_widget.cc reconstruction_stats_widget.h
+	mesh_painter.cc mesh_painter.h
 
-	
 )
 #qt5_add_resource()
 

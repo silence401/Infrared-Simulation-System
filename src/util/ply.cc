@@ -29,6 +29,8 @@
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
 
+
+
 #include "util/ply.h"
 
 #include <fstream>
@@ -39,7 +41,486 @@
 #include "util/misc.h"
 
 namespace infrared {
+PlyMesh ReadPlyMesh(const std::string& path) {
 
+  std::cerr<<"ReadPlyMesh"<<std::endl;
+  std::ifstream file(path, std::ios::binary);
+  std::string line;
+  std::vector<PlyMeshVertex> points;
+  //std::vector<PlyTexCoord>
+  std::vector<PlyMeshFace> faces;
+  PlyMesh Mesh;
+
+  // The index of the property for ASCII PLY files.
+  int X_index = -1;
+  int Y_index = -1;
+  int Z_index = -1;
+  int NX_index = -1;
+  int NY_index = -1;
+  int NZ_index = -1;
+  int R_index = -1;
+  int G_index = -1;
+  int B_index = -1;
+  unsigned char face_num = -1;
+  unsigned char tex_num = -1;
+  int FV_index1 = -1;
+  int FV_index2 = -1;
+  int FV_index3 = -1;
+  float texCoordX1 = -1;
+  float texCoordX2 = -1;
+  float texCoordY1 = -1;
+  float texCoordY2 = -1;
+  float texCoordZ1 = -1;
+  float texCoordZ2 = -1;
+  // Flag to use double precision in binary PLY files
+  bool X_double = false;
+  bool Y_double = false;
+  bool Z_double = false;
+  bool NX_double = false;
+  bool NY_double = false;
+  bool NZ_double = false;
+
+
+  // The position in number of bytes of the property for binary PLY files.
+  int X_byte_pos = -1;
+  int Y_byte_pos = -1;
+  int Z_byte_pos = -1;
+  int NX_byte_pos = -1;
+  int NY_byte_pos = -1;
+  int NZ_byte_pos = -1;
+  int R_byte_pos = -1;
+  int G_byte_pos = -1;
+  int B_byte_pos = -1;
+  unsigned char face_num_byte_pos = -1;
+  unsigned char tex_num_byte_pos = -1;
+  int FV_ind1_byte_pos = -1;
+  int FV_ind2_byte_pos = -1;
+  int FV_ind3_byte_pos = -1;
+  float texCoordX1_byte_pos = -1;
+  float texCoordX2_byte_pos = -1;
+  float texCoordY1_byte_pos = -1;
+  float texCoordY2_byte_pos = -1;
+  float texCoordZ1_byte_pos = -1;
+  float texCoordZ2_byte_pos = -1;
+
+  bool in_vertex_section = false;
+  bool in_face_section = false;
+  bool is_binary = false;
+  bool is_little_endian = false;
+  size_t ver_num_bytes_per_line = 0;
+  size_t face_num_bytes_per_line = 0;
+  size_t num_vertices = 0;
+  size_t num_faces = 0;
+
+  int ver_index = 0;
+  int face_index = 0;
+  while(std::getline(file, line)) {
+    StringTrim(&line);
+    std::cerr<<"HERE："<<line<<std::endl;
+
+    if(line.empty()){
+      continue;
+    }
+    if(line == "end_header"){
+      break;
+    }
+
+    if(line.size() >= 6 && line.substr(0, 6) == "format"){
+      if (line == "format ascii 1.0") {
+        is_binary = false;
+      } else if (line == "format binary_little_endian 1.0") {
+        is_binary = true;
+        is_little_endian = true;
+      } else if (line == "format binary_big_endian 1.0") {
+        is_binary = true;
+        is_little_endian = false;
+      }
+
+    }
+
+    const std::vector<std::string> line_elems = StringSplit(line, " ");
+
+    if (line_elems.size() >= 3 && line_elems[0] == "element") {
+      in_vertex_section = false;
+      in_face_section = false;
+      if (line_elems[1] == "vertex") {
+        num_vertices = std::stoll(line_elems[2]);
+        in_vertex_section = true;
+        in_face_section = false;
+      }
+      else if(line_elems[1] == "face"){
+        num_faces = std::stoll(line_elems[2]);
+        in_face_section = true;
+        in_vertex_section = false;
+      }
+      else if (std::stoll(line_elems[2]) > 0) {
+        std::cout << "WARN: Only vertex and faces elements supported; ignoring "
+                  << line_elems[1] << std::endl;
+      }
+      std::cerr<<num_vertices<<' '<<num_faces<<std::endl;
+    }
+
+    if(in_vertex_section){
+      if (line_elems.size() >= 3 && line_elems[0] == "property") {
+      CHECK(line_elems[1] == "float" || line_elems[1] == "float32" ||
+            line_elems[1] == "double" || line_elems[1] == "float64" ||
+            line_elems[1] == "uchar")
+          << "PLY import only supports float, double, and uchar data types";
+
+      if (line == "property float x" || line == "property float32 x" ||
+          line == "property double x" || line == "property float64 x") {
+        X_index = ver_index;
+        X_byte_pos = ver_num_bytes_per_line;
+        X_double = (line_elems[1] == "double" || line_elems[1] == "float64");
+      } else if (line == "property float y" || line == "property float32 y" ||
+                 line == "property double y" || line == "property float64 y") {
+        Y_index = ver_index;
+        Y_byte_pos = ver_num_bytes_per_line;
+        Y_double = (line_elems[1] == "double" || line_elems[1] == "float64");
+      } else if (line == "property float z" || line == "property float32 z" ||
+                 line == "property double z" || line == "property float64 z") {
+        Z_index = ver_index;
+        Z_byte_pos = ver_num_bytes_per_line;
+        Z_double = (line_elems[1] == "double" || line_elems[1] == "float64");
+      } else if (line == "property float nx" || line == "property float32 nx" ||
+                 line == "property double nx" ||
+                 line == "property float64 nx") {
+        NX_index = ver_index;
+        NX_byte_pos = ver_num_bytes_per_line;
+        NX_double = (line_elems[1] == "double" || line_elems[1] == "float64");
+      } else if (line == "property float ny" || line == "property float32 ny" ||
+                 line == "property double ny" ||
+                 line == "property float64 ny") {
+        NY_index = ver_index;
+        NY_byte_pos = ver_num_bytes_per_line;
+        NY_double = (line_elems[1] == "double" || line_elems[1] == "float64");
+      } else if (line == "property float nz" || line == "property float32 nz" ||
+                 line == "property double nz" ||
+                 line == "property float64 nz") {
+        NZ_index = ver_index;
+        NZ_byte_pos = ver_num_bytes_per_line;
+        NZ_double = (line_elems[1] == "double" || line_elems[1] == "float64");
+      } else if (line == "property uchar r" || line == "property uchar red" ||
+                 line == "property uchar diffuse_red" ||
+                 line == "property uchar ambient_red" ||
+                 line == "property uchar specular_red") {
+        R_index = ver_index;
+        R_byte_pos = ver_num_bytes_per_line;
+      } else if (line == "property uchar g" || line == "property uchar green" ||
+                 line == "property uchar diffuse_green" ||
+                 line == "property uchar ambient_green" ||
+                 line == "property uchar specular_green") {
+        G_index = ver_index;
+        G_byte_pos = ver_num_bytes_per_line;
+      } else if (line == "property uchar b" || line == "property uchar blue" ||
+                 line == "property uchar diffuse_blue" ||
+                 line == "property uchar ambient_blue" ||
+                 line == "property uchar specular_blue") {
+        B_index = ver_index;
+        B_byte_pos = ver_num_bytes_per_line;
+      }
+
+      ver_index += 1;
+      if (line_elems[1] == "float" || line_elems[1] == "float32") {
+        ver_num_bytes_per_line += 4;
+      } else if (line_elems[1] == "double" || line_elems[1] == "float64") {
+        ver_num_bytes_per_line += 8;
+      } else if (line_elems[1] == "uchar") {
+        ver_num_bytes_per_line += 1;
+      } else {
+        LOG(FATAL) << "Invalid data type: " << line_elems[1];
+      }
+    }
+  }
+  else if(in_face_section){
+    if(line_elems.size() >= 3 && line_elems[0] == "property"){
+      CHECK(line_elems[1] == "list") <<"Face property should be list";
+    }
+    // face index
+    if(line == "property list uchar int vertex_indices"){
+      face_num = face_index;
+      face_num_byte_pos = face_num_bytes_per_line;
+      FV_index1 = ++face_index;
+      FV_index2 = ++face_index;
+      FV_index3 = ++face_index;
+      face_num_bytes_per_line+=4;
+      FV_ind1_byte_pos = face_num_bytes_per_line;
+      face_num_bytes_per_line+=4;
+      FV_ind2_byte_pos = face_num_bytes_per_line;
+      face_num_bytes_per_line+=4;
+      FV_ind3_byte_pos = face_num_bytes_per_line;
+      face_index+=1;
+      face_num_bytes_per_line += 4;
+
+    }
+    else if(line == "property list uchar float texcoord"){
+      tex_num = face_index;
+      tex_num_byte_pos = face_num_bytes_per_line;
+      texCoordX1 = ++face_index;
+      texCoordX2 = ++face_index;
+      texCoordY1 = ++face_index;
+      texCoordY2 = ++face_index;
+      texCoordZ1 = ++face_index;
+      texCoordZ2 = ++face_index;
+      face_num_bytes_per_line+=4;
+      texCoordX1_byte_pos = face_num_bytes_per_line;
+      face_num_bytes_per_line+=4;
+      texCoordX2_byte_pos = face_num_bytes_per_line;
+      face_num_bytes_per_line+=4;
+      texCoordY1_byte_pos = face_num_bytes_per_line;
+      face_num_bytes_per_line+=4;
+      texCoordY2_byte_pos = face_num_bytes_per_line;
+      face_num_bytes_per_line+=4;
+      texCoordZ1_byte_pos = face_num_bytes_per_line;
+      face_num_bytes_per_line+=4;
+      texCoordZ2_byte_pos = face_num_bytes_per_line;
+      face_index+=1;
+      face_num_bytes_per_line += 4;
+    }
+    //cout<<
+  ///  face_index+=1;
+    std::cout<<"face_index"<<face_index<<std::endl;
+   // face_num_bytes_per_line += 4;
+   }
+  }
+
+  std::cerr<<"texCoordz2"<<texCoordZ2<<std::endl;
+  const bool is_normal_missing =
+      (NX_index == -1) || (NY_index == -1) || (NZ_index == -1);
+  const bool is_rgb_missing =
+      (R_index == -1) || (G_index == -1) || (B_index == -1);
+
+  CHECK(X_index != -1 && Y_index != -1 && Z_index)
+      << "Invalid PLY file format: x, y, z properties missing";
+
+  points.reserve(num_vertices);
+  faces.reserve(num_faces);
+
+  if (is_binary) {
+    std::vector<char> buffer(ver_num_bytes_per_line);
+    for (size_t i = 0; i < num_vertices; ++i) {
+      file.read(buffer.data(), ver_num_bytes_per_line);
+
+      PlyMeshVertex point;
+
+      if (is_little_endian) {
+        point.x = LittleEndianToNative(
+            X_double ? *reinterpret_cast<double*>(&buffer[X_byte_pos])
+                     : *reinterpret_cast<float*>(&buffer[X_byte_pos]));
+        point.y = LittleEndianToNative(
+            Y_double ? *reinterpret_cast<double*>(&buffer[Y_byte_pos])
+                     : *reinterpret_cast<float*>(&buffer[Y_byte_pos]));
+        point.z = LittleEndianToNative(
+            Z_double ? *reinterpret_cast<double*>(&buffer[Z_byte_pos])
+                     : *reinterpret_cast<float*>(&buffer[Z_byte_pos]));
+
+        if (!is_normal_missing) {
+          point.nx = LittleEndianToNative(
+              NX_double ? *reinterpret_cast<double*>(&buffer[NX_byte_pos])
+                        : *reinterpret_cast<float*>(&buffer[NX_byte_pos]));
+          point.ny = LittleEndianToNative(
+              NY_double ? *reinterpret_cast<double*>(&buffer[NY_byte_pos])
+                        : *reinterpret_cast<float*>(&buffer[NY_byte_pos]));
+          point.nz = LittleEndianToNative(
+              NZ_double ? *reinterpret_cast<double*>(&buffer[NZ_byte_pos])
+                        : *reinterpret_cast<float*>(&buffer[NZ_byte_pos]));
+        }
+
+        if (!is_rgb_missing) {
+          point.r = LittleEndianToNative(
+              *reinterpret_cast<uint8_t*>(&buffer[R_byte_pos]));
+          point.g = LittleEndianToNative(
+              *reinterpret_cast<uint8_t*>(&buffer[G_byte_pos]));
+          point.b = LittleEndianToNative(
+              *reinterpret_cast<uint8_t*>(&buffer[B_byte_pos]));
+        }
+      } else {
+        point.x = BigEndianToNative(
+            X_double ? *reinterpret_cast<double*>(&buffer[X_byte_pos])
+                     : *reinterpret_cast<float*>(&buffer[X_byte_pos]));
+        point.y = BigEndianToNative(
+            Y_double ? *reinterpret_cast<double*>(&buffer[Y_byte_pos])
+                     : *reinterpret_cast<float*>(&buffer[Y_byte_pos]));
+        point.z = BigEndianToNative(
+            Z_double ? *reinterpret_cast<double*>(&buffer[Z_byte_pos])
+                     : *reinterpret_cast<float*>(&buffer[Z_byte_pos]));
+
+        if (!is_normal_missing) {
+          point.nx = BigEndianToNative(
+              NX_double ? *reinterpret_cast<double*>(&buffer[NX_byte_pos])
+                        : *reinterpret_cast<float*>(&buffer[NX_byte_pos]));
+          point.ny = BigEndianToNative(
+              NY_double ? *reinterpret_cast<double*>(&buffer[NY_byte_pos])
+                        : *reinterpret_cast<float*>(&buffer[NY_byte_pos]));
+          point.nz = BigEndianToNative(
+              NZ_double ? *reinterpret_cast<double*>(&buffer[NZ_byte_pos])
+                        : *reinterpret_cast<float*>(&buffer[NZ_byte_pos]));
+           } 
+
+        if (!is_rgb_missing) {
+          point.r = BigEndianToNative(
+              *reinterpret_cast<uint8_t*>(&buffer[R_byte_pos]));
+          point.g = BigEndianToNative(
+              *reinterpret_cast<uint8_t*>(&buffer[G_byte_pos]));
+          point.b = BigEndianToNative(
+              *reinterpret_cast<uint8_t*>(&buffer[B_byte_pos]));
+        }
+      }
+
+      points.push_back(point);
+    }
+    for(size_t i=0; i<num_faces; i++){
+      file.read(buffer.data(), face_num_bytes_per_line);
+      PlyMeshFace face;
+      
+      if(is_little_endian){
+        // int tmp_face_num = LittleEndianToNative(
+        //   *reinterpret_cast<unsigned char*>(&buffer[face_num_byte_pos])
+        // );
+        face.vertex_idx1 = LittleEndianToNative(
+          *reinterpret_cast<int*>(&buffer[FV_ind1_byte_pos])
+        );  
+        face.vertex_idx2 = LittleEndianToNative(
+          *reinterpret_cast<int*>(&buffer[FV_ind2_byte_pos])
+        );
+        face.vertex_idx3 = LittleEndianToNative(
+          *reinterpret_cast<int*>(&buffer[FV_ind3_byte_pos])
+        );
+        // int tmp_tex_num = LittleEndianToNative(
+        //   *reinterpret_cast<unsigned char*>(&buffer[tex_num_byte_pos])
+        // );
+        face.texture_idx1.u = LittleEndianToNative(
+          *reinterpret_cast<float*>(&buffer[texCoordX1_byte_pos])
+        );
+        face.texture_idx1.v = LittleEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordX2_byte_pos])
+        );
+        face.texture_idx2.u = LittleEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordY1_byte_pos])
+        );
+        face.texture_idx2.v = LittleEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordY2_byte_pos])
+        );
+        face.texture_idx3.u = LittleEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordZ1_byte_pos])
+        );
+         face.texture_idx3.v = LittleEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordZ2_byte_pos])
+        );
+        faces.push_back(face);
+
+      }
+      else{
+
+        // int tmp_face_num = BigEndianToNative(
+        //   *reinterpret_cast<unsigned char*>(&buffer[face_num_byte_pos])
+        // );
+        face.vertex_idx1 = BigEndianToNative(
+          *reinterpret_cast<int*>(&buffer[FV_ind1_byte_pos])
+        );
+        face.vertex_idx2 = BigEndianToNative(
+          *reinterpret_cast<int*>(&buffer[FV_ind2_byte_pos])
+        );
+        face.vertex_idx3 = BigEndianToNative(
+          *reinterpret_cast<int*>(&buffer[FV_ind3_byte_pos])
+        );
+        // int tmp_tex_num = BigEndianToNative(
+        //   *reinterpret_cast<unsigned char*>(&buffer[tex_num_byte_pos])
+        // );
+        face.texture_idx1.u = BigEndianToNative(
+          *reinterpret_cast<float*>(&buffer[texCoordX1_byte_pos])
+        );
+        face.texture_idx1.v = BigEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordX2_byte_pos])
+        );
+        face.texture_idx2.u = BigEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordY1_byte_pos])
+        );
+        face.texture_idx2.v = BigEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordY2_byte_pos])
+        );
+        face.texture_idx3.u = BigEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordZ1_byte_pos])
+        );
+        face.texture_idx3.v = BigEndianToNative(
+           *reinterpret_cast<float*>(&buffer[texCoordZ2_byte_pos])
+        );
+        faces.push_back(face);
+
+      }
+
+    }
+  } else {
+    for(size_t i=0; i<num_vertices; i++){
+      std::getline(file, line);
+      //std::cerr<<line<<std::endl;
+      StringTrim(&line);
+      std::stringstream line_stream(line);
+
+      std::string item;
+      std::vector<std::string> items;
+      while (!line_stream.eof()) {
+        std::getline(line_stream, item, ' ');
+        StringTrim(&item);
+        items.push_back(item);
+      }
+
+      PlyMeshVertex point;
+
+      point.x = std::stold(items.at(X_index));
+      point.y = std::stold(items.at(Y_index));
+      point.z = std::stold(items.at(Z_index));
+
+      if (!is_normal_missing) {
+        point.nx = std::stold(items.at(NX_index));
+        point.ny = std::stold(items.at(NY_index));
+        point.nz = std::stold(items.at(NZ_index));
+      }
+
+      if (!is_rgb_missing) {
+        point.r = std::stoi(items.at(R_index));
+        point.g = std::stoi(items.at(G_index));
+        point.b = std::stoi(items.at(B_index));
+      }
+
+      points.push_back(point);
+    
+    }
+    for(size_t i=0; i<num_faces; i++){
+
+     // PlyMeshFace face;
+      std::getline(file, line);
+      StringTrim(&line);
+      std::stringstream line_stream(line);
+
+      std::string item;
+      std::vector<std::string> items;
+      while(!line_stream.eof()){
+        std::getline(line_stream, item, ' ');
+        StringTrim(&item);
+        items.push_back(item);
+      }
+      PlyMeshFace face;
+      face.vertex_idx1 = std::stoi(items.at(FV_index1));
+      face.vertex_idx2 = std::stoi(items.at(FV_index2));
+      face.vertex_idx3 = std::stoi(items.at(FV_index3));
+      face.texture_idx1.u = std::stof(items.at(texCoordX1));
+      face.texture_idx1.v = std::stof(items.at(texCoordX2));
+      face.texture_idx2.u = std::stof(items.at(texCoordY1));
+      face.texture_idx2.v = std::stof(items.at(texCoordY2));
+      face.texture_idx3.u = std::stof(items.at(texCoordZ1));
+      face.texture_idx3.v = std::stof(items.at(texCoordZ2));
+
+      faces.push_back(face);
+    }
+
+   }
+
+  Mesh.vertices = points;
+  Mesh.faces = faces;
+  return Mesh;
+
+}
 std::vector<PlyPoint> ReadPly(const std::string& path) {
   std::ifstream file(path, std::ios::binary);
   CHECK(file.is_open()) << path;
@@ -58,6 +539,13 @@ std::vector<PlyPoint> ReadPly(const std::string& path) {
   int R_index = -1;
   int G_index = -1;
   int B_index = -1;
+  // Flag to use double precision in binary PLY files
+  // bool X_double = false;
+  // bool Y_double = false;
+  // bool Z_double = false;
+  // bool NX_double = false;
+  // bool NY_double = false;
+  // bool NZ_double = false;
 
   // The position in number of bytes of the property for binary PLY files.
   int X_byte_pos = -1;
@@ -243,7 +731,7 @@ std::vector<PlyPoint> ReadPly(const std::string& path) {
 
       points.push_back(point);
     }
-  } else {
+  }  else {
     while (std::getline(file, line)) {
       StringTrim(&line);
       std::stringstream line_stream(line);

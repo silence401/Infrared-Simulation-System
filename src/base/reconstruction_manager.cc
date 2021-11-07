@@ -82,6 +82,8 @@ size_t ReconstructionManager::Read(const std::string& path) {
 
 void ReconstructionManager::Write(const std::string& path,
                                   const OptionManager* options) const {
+
+  std::cout<<reconstructions_.size()<<std::endl;                          
   for (size_t i = 0; i < reconstructions_.size(); ++i) {
     const std::string reconstruction_path = JoinPaths(path, std::to_string(i));
     CreateDirIfNotExists(reconstruction_path);

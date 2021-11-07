@@ -855,16 +855,26 @@ std::vector<PlyPoint> Reconstruction::ConvertToPLY() const {
 }
 
 void Reconstruction::ImportPLY(const std::string& path) {
-  points3D_.clear();
+  // points3D_.clear();
+  Model loadModel(path);
+  Meshes = loadModel.meshes;
+  std::cout<<"LOAD OVER"<<std::endl;
+  
+  // //const auto ply_points = ReadPly(path);
+  // const auto ply_mesh = ReadPlyMesh(path);
 
-  const auto ply_points = ReadPly(path);
+  // //points3D_.reserve(ply_points.size());
+  // points3D_.reserve(ply_mesh.vertices.size());
 
-  points3D_.reserve(ply_points.size());
+  // // for (const auto& ply_point : ply_points) {
+  // //   AddPoint3D(Eigen::Vector3d(ply_point.x, ply_point.y, ply_point.z), Track(),
+  // //              Eigen::Vector3ub(ply_point.r, ply_point.g, ply_point.b));
+  // // }
+  //  for (const auto& ply_point : ply_mesh.vertices) {
+  //   AddPoint3D(Eigen::Vector3d(ply_point.x, ply_point.y, ply_point.z), Track(),
+  //              Eigen::Vector3ub(ply_point.r, ply_point.g, ply_point.b));
 
-  for (const auto& ply_point : ply_points) {
-    AddPoint3D(Eigen::Vector3d(ply_point.x, ply_point.y, ply_point.z), Track(),
-               Eigen::Vector3ub(ply_point.r, ply_point.g, ply_point.b));
-  }
+
 }
 
 void Reconstruction::ImportPLY(const std::vector<PlyPoint> &ply_points)

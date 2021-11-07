@@ -28,7 +28,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 // Author: Johannes L. Schoenberger (jsch-at-demuc-dot-de)
-
+#include<iostream>
 #include "ui/point_painter.h"
 
 #include "util/opengl_utils.h"
@@ -98,6 +98,39 @@ void PointPainter::Upload(const std::vector<PointPainter::Data>& data) {
 #endif
 }
 
+void PointPainter::Upload(const Mesh& data){
+  num_geoms_ = data.vertices.size();
+  std::cout<<num_geoms_<<std::endl;
+  std::cout<<sizeof(Vertex)<<std::endl;
+  if(num_geoms_ == 0){
+    return ;
+  }
+
+  vao_.bind();
+  vbo_.bind();
+  vbo_.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+  vbo_.allocate(data.vertices.data(),
+                static_cast<int>(data.vertices.size() * sizeof(Vertex)));
+
+  // in_position
+  shader_program_.enableAttributeArray("a_position");
+  shader_program_.setAttributeBuffer("a_position", GL_FLOAT, 0, 3,
+                                     sizeof(Vertex));
+
+  // in_color
+  shader_program_.enableAttributeArray("a_color");
+  shader_program_.setAttributeBuffer("a_color", GL_FLOAT, 3 * sizeof(GLfloat),
+                                     4, sizeof(Vertex));
+
+  // Make sure they are not changed from the outside
+  vbo_.release();
+  vao_.release();
+
+#if DEBUG
+  glDebugLog();
+#endif
+
+}
 void PointPainter::Render(const QMatrix4x4& pmv_matrix,
                           const float point_size) {
   if (num_geoms_ == 0) {

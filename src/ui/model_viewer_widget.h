@@ -45,6 +45,7 @@
 #include "ui/line_painter.h"
 #include "ui/movie_grabber_widget.h"
 #include "ui/point_painter.h"
+#include "ui/mesh_painter.h"
 #include "ui/point_viewer_widget.h"
 #include "ui/render_options.h"
 #include "ui/triangle_painter.h"
@@ -152,6 +153,7 @@ class ModelViewerWidget : public QOpenGLWidget,
   void UploadImageData(const bool selection_mode = false);
   void UploadImageConnectionData();
   void UploadMovieGrabberData();
+  void UploadMeshData();
 
   void ComposeProjectionMatrix();
 
@@ -179,6 +181,8 @@ class ModelViewerWidget : public QOpenGLWidget,
   LinePainter movie_grabber_path_painter_;
   LinePainter movie_grabber_line_painter_;
   TrianglePainter movie_grabber_triangle_painter_;
+
+  std::vector<std::shared_ptr<MeshPainter> > meshes_painter_;
 
   PointViewerWidget* point_viewer_widget_;
   DatabaseImageViewerWidget* image_viewer_widget_;

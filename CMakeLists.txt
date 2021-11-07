@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(main)
 
-option(SIMD_ENABLED "Whether to enable SIMD optimizations" OFF)
+option(SIMD_ENABLED "Whether to enable SIMD optimizations" on)
 option(OPENMP_ENABLED "Whether to enable OpenMP parallelization" ON)
 option(IPO_ENABLED "Whether to enable interprocedural optimization" ON)
 option(CUDA_ENABLED "Whether to enable CUDA, if available" ON)
@@ -21,6 +21,13 @@ find_package(Qt5 5.4 REQUIRED COMPONENTS Core OpenGL Widgets)
 find_package(Eigen3)
 set(CUDA_MIN_VERSION "7.0")
 find_package(CUDA ${CUDA_MIN_VERSION} QUIET)
+find_package(ASSIMP REQUIRED)
+message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
+
+if(OPENMP_ENABLED)
+    find_package(OpenMP QUIET)
+endif()
+
 if(CUDA_FOUND)
     message("CUDA FOUND")
     add_definitions("-DCUDA_ENABLED")
@@ -79,7 +86,28 @@ find_package(Boost REQUIRED COMPONENTS
              unit_test_framework)
 
 #find_package(G2O REQUIRED)
+if(OPENGL_ENABLED)
+    add_definitions("-DOPENGL_ENABLED")
+    message(STATUS "Enabling OpenGL support")
+else()
+    message(STATUS "Disabling OpenGL support")
+endif()
 
+if(CGAL_FOUND AND CGAL_ENABLED)
+    message(STATUS "Enabling CGAL support")
+    add_definitions("-DCGAL_ENABLED")
+else()
+    message(STATUS "Disabling CGAL support")
+    set(CGAL_ENABLED OFF)
+endif()
+
+if(CMAKE_BUILD_TYPE)
+    message(STATUS "Build type specified as ${CMAKE_BUILD_TYPE}")
+else()
+    message(STATUS "Build type not specified, using Release")
+    set(CMAKE_BUILD_TYPE Release)
+    set(IS_DEBUG OFF)
+endif()
 #message(${EIGEN3_INCLUDE_DIRS})
 include_directories(
     ${Qt5OpenGL_INCLUDE_DIRS} 
@@ -205,7 +233,7 @@ add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 add_definitions(-DBOOST_SYSTEM_NO_DEPRECATED)
 # aux_source_directory(./src/util/ CPP_LIST2)
 # aux_source_directory(./src CPP_LIST1)
-message("*************************")
+#message("*************************")
 set(COLMAP_EXTERNAL_LIBRARIES
     pthread
     ${GLOG_LIBRARIES}
@@ -220,6 +248,7 @@ set(COLMAP_EXTERNAL_LIBRARIES
     ${CGAL_LIBRARY}
     ${GMP_LIBRARIES}
     ${OpenMP_libomp_LIBRARY}
+    ${ASSIMP_LIBRARY}
     )
 
 set(COLMAP_INTERNAL_LIBRARIES

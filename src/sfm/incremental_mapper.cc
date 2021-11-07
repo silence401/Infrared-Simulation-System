@@ -147,7 +147,7 @@ bool IncrementalMapper::FindInitialImagePair(const Options& options,
                                              image_t* image_id1,
                                              image_t* image_id2) {
   CHECK(options.Check());
-
+  std::cout<<"find Pair"<<std::endl;
   std::vector<image_t> image_ids1;
   if (*image_id1 != kInvalidImageId && *image_id2 == kInvalidImageId) {
     // Only *image_id1 provided.
@@ -165,27 +165,27 @@ bool IncrementalMapper::FindInitialImagePair(const Options& options,
     // No initial seed image provided.
     image_ids1 = FindFirstInitialImage(options);
   }
-
+  std::cout<<"-----------1"<<std::endl;
   // Try to find good initial pair.
   for (size_t i1 = 0; i1 < image_ids1.size(); ++i1) {
     *image_id1 = image_ids1[i1];
-
+    std::cout<<"-----------"<<i1<<std::endl;
     const std::vector<image_t> image_ids2 =
         FindSecondInitialImage(options, *image_id1);
-
+    std::cout<<"**********"<<i1<<std::endl;
     for (size_t i2 = 0; i2 < image_ids2.size(); ++i2) {
       *image_id2 = image_ids2[i2];
-
+       std::cout<<"==========="<<i2<<std::endl;
       const image_pair_t pair_id =
           Database::ImagePairToPairId(*image_id1, *image_id2);
-
+        std::cout<<"xxxxxxxxxxxxx"<<i2<<std::endl;
       // Try every pair only once.
       if (init_image_pairs_.count(pair_id) > 0) {
         continue;
       }
 
       init_image_pairs_.insert(pair_id);
-
+      std::cout<<"##############"<<i2<<std::endl;
       if (EstimateInitialTwoViewGeometry(options, *image_id1, *image_id2)) {
         return true;
       }
@@ -299,11 +299,11 @@ bool IncrementalMapper::RegisterInitialImagePair(const Options& options,
   //////////////////////////////////////////////////////////////////////////////
   // Update Reconstruction
   //////////////////////////////////////////////////////////////////////////////
-
   reconstruction_->RegisterImage(image_id1);
   reconstruction_->RegisterImage(image_id2);
   RegisterImageEvent(image_id1);
   RegisterImageEvent(image_id2);
+  
 
   const CorrespondenceGraph& correspondence_graph =
       database_cache_->CorrespondenceGraph();
@@ -312,7 +312,6 @@ bool IncrementalMapper::RegisterInitialImagePair(const Options& options,
                                                             image_id2);
 
   const double min_tri_angle_rad = DegToRad(options.init_min_tri_angle);
-
   // Add 3D point tracks.
   Track track;
   track.Reserve(2);
@@ -1150,7 +1149,7 @@ bool IncrementalMapper::EstimateInitialTwoViewGeometry(
   if (prev_init_image_pair_id_ == image_pair_id) {
     return true;
   }
-
+  std::cerr<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh11111"<<std::endl;
   const Image& image1 = database_cache_->Image(image_id1);
   const Camera& camera1 = database_cache_->Camera(image1.CameraId());
 
@@ -1162,7 +1161,7 @@ bool IncrementalMapper::EstimateInitialTwoViewGeometry(
   const FeatureMatches matches =
       correspondence_graph.FindCorrespondencesBetweenImages(image_id1,
                                                             image_id2);
-
+  std::cerr<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh2222222"<<std::endl;
   std::vector<Eigen::Vector2d> points1;
   points1.reserve(image1.NumPoints2D());
   for (const auto& point : image1.Points2D()) {
@@ -1186,7 +1185,7 @@ bool IncrementalMapper::EstimateInitialTwoViewGeometry(
                                               points2)) {
     return false;
   }
-
+  std::cerr<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhh333333"<<std::endl;
   if (static_cast<int>(two_view_geometry.inlier_matches.size()) >=
           options.init_min_num_inliers &&
       std::abs(two_view_geometry.tvec.z()) < options.init_max_forward_motion &&

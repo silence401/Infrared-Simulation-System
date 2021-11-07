@@ -88,8 +88,8 @@ if(CUDA_ENABLED)
     #message("**********************8")
     #message(${COLMAP_EXTERNAL_LIBRARIES})
     target_link_libraries(colmap
-        colmap_cuda ${COLMAP_INTERNAL_LIBRARIES} ${COLMAP_EXTERNAL_LIBRARIES})
+        colmap_cuda ${COLMAP_INTERNAL_LIBRARIES} ${COLMAP_EXTERNAL_LIBRARIES} ${ASSIMP_LIBRARY})
 else()
     target_link_libraries(colmap
-        ${COLMAP_INTERNAL_LIBRARIES} ${COLMAP_EXTERNAL_LIBRARIES})
+        ${COLMAP_INTERNAL_LIBRARIES} ${COLMAP_EXTERNAL_LIBRARIES} ${ASSIMP_LIBRARY})
 endif()

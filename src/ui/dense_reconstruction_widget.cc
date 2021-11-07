@@ -305,9 +305,14 @@ void DenseReconstructionWidget::showEvent(QShowEvent* event) {
 }
 
 void DenseReconstructionWidget::Show(Reconstruction* reconstruction) {
+ // std::cerr<<"dense_show"<<std::endl;
+
   reconstruction_ = reconstruction;
+ // reconstruction_ = nullptr; 
   show();
+ // std::cerr<<"dense_show"<<std::endl;
   raise();
+ // std::cerr<<"dense2"<<std::endl;
 }
 
 void DenseReconstructionWidget::Undistort() {

@@ -49,14 +49,17 @@ class ProjectWidget : public QWidget {
 
   std::string GetDatabasePath() const;
   std::string GetImagePath() const;
+  std::string GetProjectPath() const;
   void SetDatabasePath(const std::string& path);
   void SetImagePath(const std::string& path);
+  void SetProjectPath(const std::string& path);
 
  private:
   void Save();
   void SelectNewDatabasePath();
   void SelectExistingDatabasePath();
   void SelectImagePath();
+  void SelectProjectPath();
   QString DefaultDirectory();
 
   OptionManager* options_;
@@ -67,6 +70,7 @@ class ProjectWidget : public QWidget {
   // Text boxes that hold the currently selected paths.
   QLineEdit* database_path_text_;
   QLineEdit* image_path_text_;
+  QLineEdit* project_path_text_;
 };
 
 }  // namespace infrared
