@@ -24,6 +24,7 @@ COLMAP_ADD_SOURCES(
 	bundle_adjustment_widget.cc bundle_adjustment_widget.h
 	reconstruction_stats_widget.cc reconstruction_stats_widget.h
 	mesh_painter.cc mesh_painter.h
+	enviroment_set_widget.cc enviroment_set_widget.h
 
 )
 #qt5_add_resource()

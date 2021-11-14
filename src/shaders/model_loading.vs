@@ -12,7 +12,7 @@ uniform mat4 u_pmv_matrix;
 
 void main(void)
 {
-    //TexCoords = a_texcoord;    
+    TexCoords = a_texcoord;    
     gl_Position = u_pmv_matrix * vec4(a_position, 1);
    // gl_Position = vec4(a_position, 1);
     gl_PointSize = 1.0f;

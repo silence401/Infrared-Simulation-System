@@ -28,4 +28,5 @@ void main(void) {
   //f_color = v_color;
    f_color = texture2D(texture_map, TexCoords);
    f_color = 0.5*f_color + 0.5*v_color;
+   f_color.a = 1.0f;
 }

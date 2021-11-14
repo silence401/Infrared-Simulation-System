@@ -56,11 +56,11 @@ namespace infrared
 
     void MeshPainter::Upload(const Mesh& mesh){
         std::cout<<"UPLOAD"<<std::endl;
-        std::cout<<mesh.textures[0].path<<std::endl;
-        std::cout<<mesh.indices.size()<<std::endl;
-        std::cout<<mesh.vertices.size()<<std::endl;
-        std::cout<<"texcoord: "<<mesh.vertices[0].tx<<' '<<mesh.vertices[0].ty<<std::endl;
-        std::cout<<mesh.vertices[0].x<<' '<<mesh.vertices[0].y<<' '<<mesh.vertices[0].z<<std::endl;
+        // std::cout<<mesh.textures[0].path<<std::endl;
+        // std::cout<<mesh.indices.size()<<std::endl;
+        // std::cout<<mesh.vertices.size()<<std::endl;
+        // std::cout<<"texcoord: "<<mesh.vertices[0].tx<<' '<<mesh.vertices[0].ty<<std::endl;
+        // std::cout<<mesh.vertices[0].x<<' '<<mesh.vertices[0].y<<' '<<mesh.vertices[0].z<<std::endl;
        // std::cout<<mesh.indices[0]<<' '<<mesh.indices[1]<<' '<<mesh.indices[2]<<' '<<mesh.indices[3]<<std::endl;
         //textures = mesh.textures;
        // num_geos = mesh.vertices.size();
@@ -69,11 +69,11 @@ namespace infrared
         vbo_.bind();
         ebo_.bind();
         QImage* image = new QImage(mesh.textures[0].path.c_str());
-        if(image->isNull()){
-            std::cout<<"???????????"<<std::endl;
-        }
-        //std::cout<<image->height<<std::endl;
-        std::cout<<mesh.textures[0].path.c_str()<<std::endl;
+        // if(image->isNull()){
+        //     std::cout<<"???????????"<<std::endl;
+        // }
+        // //std::cout<<image->height<<std::endl;
+        // std::cout<<mesh.textures[0].path.c_str()<<std::endl;
        // if(!Exists)
         //if(QImage())
         texture_.setData(*image);
@@ -225,7 +225,7 @@ namespace infrared
             std::cout<<"Error::ASSIMP: "<<importer.GetErrorString()<<std::endl;
         }
         directory = path.substr(0, path.find_last_of('/'));
-        std::cout<<"directory: "<<directory<<std::endl;
+        //std::cout<<"directory: "<<directory<<std::endl;
 
         processNode(scene->mRootNode, scene);
         std::cout<<"processNode Over"<<std::endl;
@@ -234,7 +234,7 @@ namespace infrared
     void Model::processNode(aiNode* node, const aiScene *scene){
         for(size_t i = 0; i < node->mNumMeshes; i++){
             aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-            std::cout<<i<<' '<<"processMesh"<<std::endl;
+            //std::cout<<i<<' '<<"processMesh"<<std::endl;
             meshes.push_back(processMesh(mesh, scene));
         }
 
@@ -273,6 +273,7 @@ namespace infrared
                 vertex.g = mesh->mColors[0][i].g;
                 vertex.b = mesh->mColors[0][i].b;
                 vertex.a = mesh->mColors[0][i].a;
+                vertex.a = 1.0f; //不透明
             }
             vertices.push_back(vertex);
 
@@ -353,7 +354,7 @@ namespace infrared
     //                 texture.type = type_Name;
     //                 texture.path = str.C_Str();
     //                 textures.push_back(texture);
-    //                 textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
+    //                  textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
     //             }
     //         }
        // return textures;

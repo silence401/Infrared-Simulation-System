@@ -58,6 +58,10 @@ namespace infrared{
 
         dense_reconstruction_widget_ = new DenseReconstructionWidget(this, &options_);
         
+        enviroment_set_widget_ = new EnvSetWidget(this);
+        dock_set_widget_ = new QDockWidget("set", this);
+        dock_set_widget_->setWidget(enviroment_set_widget_);
+        addDockWidget(Qt::RightDockWidgetArea, dock_set_widget_);
         
     }
     void MainWindow::CreateActions(){
@@ -74,7 +78,7 @@ namespace infrared{
 
         action_project_importply_ = new QAction(QIcon(":/media/project-new.png"), tr("Import PLY"), this);
         connect(action_project_importply_, &QAction::triggered, this, &MainWindow::ImportPLY);
-        std::cout<<"action_project_now"<<std::endl;
+        //std::cout<<"action_project_now"<<std::endl;
         action_SFM_ = new QAction(QIcon(":./media/automatic-reconstruction.png"), tr("SFM"), this);
         connect(action_SFM_, &QAction::triggered, this, &MainWindow::SFM);
         //action__SFM_->
@@ -101,8 +105,8 @@ namespace infrared{
           Qt::BlockingQueuedConnection);
        // std::cout<<"action_render_now"<<std::endl;
 
-
-
+       //action_enviromet_set_ = new QAction(tr("enviroment set"), this);
+       //connect(action_enviromet_set_, &QAction::triggered, this, &MainWindow::SetEnviroment, QT:::BlockingQueuedConnection);
     }
 
     void MainWindow::CreateMenus(){
@@ -133,7 +137,9 @@ namespace infrared{
         QMenu* simulation_menu = new QMenu(tr("Simulation"));
         menuBar()->addAction(simulation_menu->menuAction());
         menuBar()->setNativeMenuBar(false);
-      //  simulation_menu->addAction("")
+       // simulation_menu->addAction(action_enviroment_set_);
+        //simulation_menu->addAction(action_load_phymodel_);
+
 
 
     }

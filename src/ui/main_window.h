@@ -23,6 +23,7 @@
 #include "ui/reconstruction_options_widget.h"
 #include "ui/reconstruction_stats_widget.h"
 #include "ui/render_options_widget.h"
+#include "ui/enviroment_set_widget.h"
 // #include "ui/undistortion_widget.h"
 // #include "util/bitmap.h"
 #include "util/option_manager.h"
@@ -84,6 +85,8 @@ class MainWindow : public QMainWindow {
         QAction* action_render_now_;
         QAction* action_render_model_;
         QAction* action_project_edit_;
+        QAction* action_enviromet_set_;
+        QAction* action_load_phymodel_;
 
         OptionManager options_;
         ReconstructionManager reconstruction_manager_;
@@ -101,12 +104,16 @@ class MainWindow : public QMainWindow {
         DenseReconstructionWidget* dense_reconstruction_widget_;
         RenderOptionsWidget* render_options_widget_;
         ThreadControlWidget* thread_control_widget_;
+        EnvSetWidget* enviroment_set_widget_;
+
+        
 
 
 
 
 
         QDockWidget* dock_log_widget_;
+        QDockWidget* dock_set_widget_;
         QTimer* statusbar_timer_;
         QLabel* statusbar_timer_label_;
 
